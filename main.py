@@ -48,7 +48,13 @@ async def get_model_info(model_name: ModelName):
 
 # creating a route with pipe for multiple types and a defaul value 
 @app.get("/items/price")
-def read_item(price: int | None = None):
+def read_item_price(price: int | None = None):
     if price is not None:
         return {"price": price}
     return {"price": "No price provided"}
+
+# creating a route with handling boolean values and default conversion for truthy values 
+# giving out unique function names avoids uncertain issues like distinguishing between two routes with same name
+@app.get("/items/valid")
+def read_item_valid(valid: bool = False):
+    return {"valid": valid}
