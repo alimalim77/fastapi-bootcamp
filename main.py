@@ -1,6 +1,7 @@
 from typing import Union
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import Optional
 
 app = FastAPI() 
 
@@ -10,13 +11,13 @@ class Item(BaseModel):
     is_offer: Union[bool, None] = None
 
 @app.get("/")
-def read_root():
-    return {"Hello": "World"} 
+async def read_root():
+    return {"Hello": "World"}
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-@app.put("/item/{item_id}")
-def update_item(item_id: int, item: Item):
-    return {"item_id": item_id, "item": item}
+# Create a GET endpoint that takes a path parameter 'name' and returns a greeting message
+# If no path parameter is provided, query parameter of same function parameter name should be used
+# Else an error is thrown to pass the name as ID Parameter
+@app.get("/greet/{name}")
+async def greet_name(name: Optional[str] = "User", 
+                     age: int = 0 ) -> dict: 
+    return {"name": f"Hello {name}", "age": age}
