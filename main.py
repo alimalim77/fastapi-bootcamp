@@ -28,18 +28,27 @@ async def greet_name(name: Optional[str] = "User",
                      age: int = 0 ) -> dict: 
     return {"name": f"Hello {name}", "age": age}
 
-
+# Usage of type for the parameter to get_model_info being enum shows the values
+# present in the documentation as they are predefined ( from what the documentation says so far )
 @app.get("/models/{model_name}")
 async def get_model_info(model_name: ModelName):
     if model_name == ModelName.alexnet:
         return {
-            "model_name": "Deep Learning FTW!"
+            model_name: "Deep Learning FTW!"
         }
     elif model_name == ModelName.resnet:
         return {
-            "model_name": "Residuals FTW!"
+            model_name: "Residuals FTW!"
         }
     else:
         return {
-            "model_name": "LeCNN FTW!"
+            model_name: "LeCNN FTW!"
         }
+    
+
+# creating a route with pipe for multiple types and a defaul value 
+@app.get("/items/price")
+def read_item(price: int | None = None):
+    if price is not None:
+        return {"price": price}
+    return {"price": "No price provided"}
