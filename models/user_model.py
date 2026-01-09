@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from ticketing_system.db.database import Base, SessionLocal
+from db.database import Base, SessionLocal
 
 class User(Base):
     __tablename__ = "users"

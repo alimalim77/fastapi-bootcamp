@@ -1,5 +1,5 @@
-from ticketing_system.schemas.user_schema import UserCreate
-from ticketing_system.services.user_service import UserService
+from schemas.user_schema import UserCreate
+from services.user_service import UserService
 
 class UserController:
     def __init__(self):

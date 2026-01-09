@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from ticketing_system.db.database import engine, Base
-from ticketing_system.models import User
-from ticketing_system.api.v1.routes.user_routes import router as user_router
+from db.database import engine, Base
+from models import User
+from api.v1.routes.user_routes import router as user_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

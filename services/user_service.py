@@ -1,6 +1,6 @@
 from fastapi import HTTPException
-from ticketing_system.models.user_model import User
-from ticketing_system.schemas.user_schema import UserCreate
+from models.user_model import User
+from schemas.user_schema import UserCreate
 
 class UserService:
     def create_user(self, payload: UserCreate):
