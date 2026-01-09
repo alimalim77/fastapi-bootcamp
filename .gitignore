@@ -19,3 +19,5 @@ lib64/
 venv/
 env/
 ENV/
+
+.env.example
