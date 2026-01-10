@@ -1,13 +1,13 @@
 from fastapi import APIRouter
 from controllers.user_controller import UserController
 from schemas.user_schema import UserCreate, UserResponse
+from middlewares.auth_validate import UserValidationSchema
 
 router = APIRouter()
 controller = UserController()
 
-@router.post("/register", response_model=UserCreate) 
-def register_user(user: UserCreate):
-    print("ROutes")
+@router.post("/register") 
+def register_user(user: UserValidationSchema):
     response = controller.create_user(user)
     return response
 
