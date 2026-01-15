@@ -19,6 +19,7 @@ lib64/
 venv/
 env/
 ENV/
+.venv/
 
 .env.example
 app.db
