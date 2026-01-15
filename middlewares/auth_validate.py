@@ -12,5 +12,5 @@ class UserValidationSchema(BaseModel):
     @classmethod
     def validate_password(cls, v):
         if not re.match(r'^[a-zA-Z0-9]{8,30}$', v):
-            raise ValueError(...)  
+            raise ValueError("Password must be between 8 and 30 characters and contain only alphanumeric characters")
         return v
