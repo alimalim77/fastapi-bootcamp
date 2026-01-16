@@ -18,6 +18,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 from db.database import Base, DATABASE_URL
 from models.user_model import User  # Import all models here
+from models.todo import Todo
 target_metadata = Base.metadata
 
 # Override the sqlalchemy.url in the config with the one from the app

@@ -7,3 +7,5 @@ passlib[argon2]
 argon2-cffi
 python-jose[cryptography]
 httpx
+alembic
+pytest
