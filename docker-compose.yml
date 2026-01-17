@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: fastapi_db
+    environment:
+      POSTGRES_USER: fastapi
+      POSTGRES_PASSWORD: fastapi
+      POSTGRES_DB: fastapi_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fastapi -d fastapi_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://fastapi:fastapi@db:5432/fastapi_db
+      SECRET_KEY: your-secret-key-change-in-production
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./alembic:/app/alembic  # For running migrations
+    command: >
+      sh -c "alembic upgrade head && uvicorn index:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  postgres_data:
