@@ -5,7 +5,7 @@ from utils.jwt_handler import verify_token
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        excluded_paths = ["/docs", "/openapi.json", "/api/v1/users/login", "/api/v1/users/register"]
+        excluded_paths = ["/docs", "/openapi.json", "/health", "/api/v1/users/login", "/api/v1/users/register"]
         
         if request.url.path in excluded_paths:
             return await call_next(request)
