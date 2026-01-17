@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 from controllers.todo_controller import TodoController
 from schemas.todo_schema import TodoCreate, TodoUpdate, TodoResponse
 from db.session import get_db
 from sqlalchemy.orm import Session
 from typing import List
+from middlewares.role_checker import RoleChecker
 
 router = APIRouter()
 controller = TodoController()
@@ -13,12 +14,23 @@ def get_current_user_id(request: Request) -> int:
     """Extract user_id from JWT payload stored in request.state by middleware."""
     user = getattr(request.state, "user", None)
     if not user:
-        from fastapi import HTTPException
         raise HTTPException(status_code=401, detail="User not authenticated")
-    # Assuming the JWT payload has 'sub' as email, we need user_id
-    # For now, we'll extract it from the token payload
-    # You may need to adjust based on your JWT structure
-    return user.get("user_id") or user.get("sub")
+    user_id = user.get("user_id")
+    if user_id:
+        return user_id
+    
+    # Fallback: If token only has email (sub), fetch user from DB
+    email = user.get("sub")
+    if not email:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+        
+    # We need a DB session here to query by email. 
+    # But this function is a helper, not a dependency that gets DB.
+    # Refactor: Make this a dependency `get_current_user` that returns the User object.
+    # But for now, to keep changes minimal and fix the immediate int parsing error:
+    # raising error if user_id is missing might be safest since we just updated the login controller.
+    # The user has to re-login.
+    raise HTTPException(status_code=401, detail="Token missing user_id. Please login again.")
 
 
 @router.post("/", response_model=TodoResponse)
@@ -57,10 +69,11 @@ def update_todo(
     return controller.update_todo(todo_id, todo, db)
 
 
-@router.delete("/{todo_id}", status_code=204)
+@router.delete("/{todo_id}", status_code=204, dependencies=[Depends(RoleChecker(["admin"]))])
 def delete_todo(
     todo_id: int,
     db: Session = Depends(get_db)
 ):
+    """Delete a todo. Admin only."""
     controller.delete_todo(todo_id, db)
     return None

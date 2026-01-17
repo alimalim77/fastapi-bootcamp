@@ -10,7 +10,7 @@ from middlewares.jwt_middleware import JWTAuthMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    # Base.metadata.create_all(bind=engine) # DISABLED: Using Alembic migrations
     yield
 
 app = FastAPI(

@@ -30,6 +30,6 @@ class UserController:
         
         access_token_expires = timedelta(minutes=30)
         access_token = create_access_token(
-            data={"sub": user_auth.email}, expires_delta=access_token_expires
+            data={"sub": user_auth.email, "user_id": user_auth.id, "role": user_auth.role or "user"}, expires_delta=access_token_expires
         )
         return {"access_token": access_token, "token_type": "bearer"}
