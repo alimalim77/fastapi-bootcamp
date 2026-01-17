@@ -25,4 +25,5 @@ app.include_router(todo_router, prefix="/api/v1/todos", tags=["Todos"])
 
 @app.exception_handler(RequestValidationError) 
 async def validation_exception_handler(request, exc):
-    return JSONResponse(...)       
+    errors = [{"field": ".".join(str(loc) for loc in e["loc"]), "message": e["msg"]} for e in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": "Validation error", "errors": errors})       
