@@ -1121,6 +1121,17 @@ curl -X POST http://localhost:8000/api/v1/users/refresh \
 curl -X POST http://localhost:8000/api/v1/users/logout \
   -b cookies.txt
 ```
+### Running the pre-written tests
+```
+# From project root
+pytest
+
+# With verbose output
+pytest -v
+
+# With print statements visible
+pytest -v -s
+```
 
 ---
 
