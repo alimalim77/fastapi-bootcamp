@@ -1,9 +1,11 @@
 from fastapi import HTTPException
 from services.user_service import UserService
 from schemas.user_schema import UserCreate, UserResponse, UserLogin, Token
-from utils.jwt_handler import create_access_token
-from datetime import timedelta
+from utils.jwt_handler import create_access_token, get_refresh_token_expiry
+from models.refresh_token import RefreshToken
+from datetime import timedelta, datetime
 from utils.exceptions import UserAlreadyExistsError, UserNotFoundError
+
 
 class UserController:
     def __init__(self):
@@ -26,10 +28,55 @@ class UserController:
     def login_user(self, user: UserLogin, db) -> Token:
         user_auth = self.userService.authenticate_user(user.email, user.password, db)
         if not user_auth:
-             raise HTTPException(status_code=401, detail="Incorrect email or password")
+            raise HTTPException(status_code=401, detail="Incorrect email or password")
         
+        # Create access token
         access_token_expires = timedelta(minutes=30)
         access_token = create_access_token(
-            data={"sub": user_auth.email, "user_id": user_auth.id, "role": user_auth.role or "user"}, expires_delta=access_token_expires
+            data={"sub": user_auth.email, "user_id": user_auth.id, "role": user_auth.role or "user"},
+            expires_delta=access_token_expires
         )
+        
+        # Create refresh token
+        refresh_token = RefreshToken(
+            token=RefreshToken.generate_token(),
+            user_id=user_auth.id,
+            expires_at=get_refresh_token_expiry()
+        )
+        refresh_token.save(db)
+        
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token.token,
+            "token_type": "bearer"
+        }
+
+    def refresh_access_token(self, refresh_token_str: str, db) -> dict:
+        """Exchange a refresh token for a new access token."""
+        # Find the refresh token
+        token_record = RefreshToken.get_by_token(db, refresh_token_str)
+        if not token_record:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+        
+        # Check if expired
+        if token_record.expires_at < datetime.utcnow():
+            token_record.revoke(db)
+            raise HTTPException(status_code=401, detail="Refresh token expired")
+        
+        # Get the user
+        user = self.userService.get_user_by_id(token_record.user_id, db)
+        
+        # Create new access token
+        access_token = create_access_token(
+            data={"sub": user.email, "user_id": user.id, "role": user.role or "user"},
+            expires_delta=timedelta(minutes=30)
+        )
+        
         return {"access_token": access_token, "token_type": "bearer"}
+
+    def logout_user(self, refresh_token_str: str, db) -> dict:
+        """Revoke a refresh token (logout)."""
+        token_record = RefreshToken.get_by_token(db, refresh_token_str)
+        if token_record:
+            token_record.revoke(db)
+        return {"message": "Successfully logged out"}
