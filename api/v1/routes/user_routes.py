@@ -42,7 +42,7 @@ def login_for_access_token(response: Response, form_data: UserLogin, db: Session
         httponly=True,      # Cannot be accessed by JavaScript
         secure=False,       # Set to True in production (HTTPS only)
         samesite="lax",     # CSRF protection
-        path="/api/v1/users"  # Only sent to user routes
+        path="/"  # Send cookie to all routes
     )
     
     # Return only access token in response body
@@ -81,7 +81,7 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)):
     # Clear the cookie
     response.delete_cookie(
         key=REFRESH_TOKEN_COOKIE_NAME,
-        path="/api/v1/users"
+        path="/"
     )
     
     return {"message": "Successfully logged out"}

@@ -23,3 +23,5 @@ ENV/
 
 .env.example
 app.db
+fastapi.db
+cookies.txt

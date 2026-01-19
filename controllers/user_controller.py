@@ -3,7 +3,7 @@ from services.user_service import UserService
 from schemas.user_schema import UserCreate, UserResponse, UserLogin, Token
 from utils.jwt_handler import create_access_token, get_refresh_token_expiry
 from models.refresh_token import RefreshToken
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from utils.exceptions import UserAlreadyExistsError, UserNotFoundError
 
 
@@ -58,8 +58,15 @@ class UserController:
         if not token_record:
             raise HTTPException(status_code=401, detail="Invalid refresh token")
         
-        # Check if expired
-        if token_record.expires_at < datetime.utcnow():
+        # Check if expired - handle both timezone-aware and naive datetimes
+        expires_at = token_record.expires_at
+        now = datetime.now(timezone.utc)
+        
+        # If expires_at is timezone-naive, assume it's UTC
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        
+        if expires_at < now:
             token_record.revoke(db)
             raise HTTPException(status_code=401, detail="Refresh token expired")
         

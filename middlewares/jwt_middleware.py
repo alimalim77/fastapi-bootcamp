@@ -7,7 +7,11 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         excluded_paths = ["/docs", "/openapi.json", "/health", "/api/v1/users/login", "/api/v1/users/register", "/api/v1/users/refresh", "/api/v1/users/logout"]
         
-        if request.url.path in excluded_paths:
+        # Normalize path by removing trailing slash for comparison
+        request_path = request.url.path.rstrip("/") or "/"
+        normalized_excluded = [p.rstrip("/") or "/" for p in excluded_paths]
+        
+        if request_path in normalized_excluded:
             return await call_next(request)
         
         auth_header = request.headers.get("Authorization")

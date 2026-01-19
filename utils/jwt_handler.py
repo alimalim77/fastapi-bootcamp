@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import jwt
 from typing import Optional
 import os
@@ -35,4 +35,4 @@ def verify_token(token: str) -> Optional[dict]:
 
 def get_refresh_token_expiry() -> datetime:
     """Get the expiry datetime for a refresh token."""
-    return datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    return datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
