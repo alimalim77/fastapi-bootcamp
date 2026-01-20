@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from controllers.user_controller import UserController
-from schemas.user_schema import UserCreate, UserResponse, UserLogin
+from schemas.user_schema import UserCreate, UserResponse, UserLogin, RegisterResponse, OTPVerifyRequest
 from middlewares.auth_validate import UserValidationSchema
 from db.session import get_db
 from sqlalchemy.orm import Session
@@ -15,14 +15,24 @@ REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60  # 7 days in seconds
 
 @router.post(
     "/register",
-    response_model=UserResponse,
+    response_model=RegisterResponse,
     summary="Register a new user",
-    description="Create a new user account with email and password."
+    description="Initiate registration by sending OTP to email. If email already has pending registration, resends OTP."
 )
 def register_user(user: UserValidationSchema, db: Session = Depends(get_db)):
-    """Register a new user."""
-    user_create = UserCreate(email=user.email, password=user.password)
-    return controller.create_user(user_create, db)
+    """Initiate registration with OTP verification."""
+    return controller.initiate_registration(user.email, user.password, db)
+
+
+@router.post(
+    "/verify-otp",
+    response_model=UserResponse,
+    summary="Verify OTP and complete registration",
+    description="Verify the OTP code to complete user registration."
+)
+def verify_otp(request: OTPVerifyRequest, db: Session = Depends(get_db)):
+    """Verify OTP and create user account."""
+    return controller.verify_otp(request.pending_registration_id, request.otp, db)
 
 
 @router.post(

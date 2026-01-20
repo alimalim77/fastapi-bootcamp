@@ -5,7 +5,15 @@ from utils.jwt_handler import verify_token
 
 class JWTAuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        excluded_paths = ["/docs", "/openapi.json", "/health", "/api/v1/users/login", "/api/v1/users/register", "/api/v1/users/refresh", "/api/v1/users/logout"]
+        excluded_paths = ["/docs", 
+        "/openapi.json", 
+        "/health", 
+        "/api/v1/users/login", 
+        "/api/v1/users/register", 
+        "/api/v1/users/refresh", 
+        "/api/v1/users/logout", 
+        "/api/v1/users/verify-otp"
+        ]
         
         # Normalize path by removing trailing slash for comparison
         request_path = request.url.path.rstrip("/") or "/"

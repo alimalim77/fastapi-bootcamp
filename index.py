@@ -1,3 +1,10 @@
+from dotenv import load_dotenv
+load_dotenv()  # Load .env file
+
+import os
+print(f"[DEBUG] EMAIL_ADDRESS: {os.getenv('EMAIL_ADDRESS')}")
+print(f"[DEBUG] EMAIL_PASSWORD: {os.getenv('EMAIL_PASSWORD')}")
+
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from db.database import engine, Base

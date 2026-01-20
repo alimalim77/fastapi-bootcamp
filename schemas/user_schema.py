@@ -21,3 +21,13 @@ class Token(BaseModel):
     token_type: str
 
 
+class RegisterResponse(BaseModel):
+    """Response after initiating registration."""
+    message: str
+    pending_registration_id: int
+
+
+class OTPVerifyRequest(BaseModel):
+    """Request to verify OTP and complete registration."""
+    pending_registration_id: int
+    otp: str

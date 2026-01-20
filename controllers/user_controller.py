@@ -1,15 +1,86 @@
 from fastapi import HTTPException
 from services.user_service import UserService
-from schemas.user_schema import UserCreate, UserResponse, UserLogin, Token
+from schemas.user_schema import UserCreate, UserResponse, UserLogin, Token, RegisterResponse
 from utils.jwt_handler import create_access_token, get_refresh_token_expiry
+from utils.email_sender import send_otp_email
 from models.refresh_token import RefreshToken
+from models.pending_registration import PendingRegistration
 from datetime import timedelta, datetime, timezone
 from utils.exceptions import UserAlreadyExistsError, UserNotFoundError
+from utils.hash_generator import hash_password
 
 
 class UserController:
     def __init__(self):
         self.userService: UserService = UserService()
+
+    def initiate_registration(self, email: str, password: str, db) -> RegisterResponse:
+        """
+        Initiate registration by creating pending registration and sending OTP.
+        If email already has pending registration, resend new OTP.
+        """
+        # Check if user already exists
+        from models.user_model import User
+        existing_user = User.get_by_email(db, email)
+        if existing_user:
+            raise HTTPException(status_code=400, detail="User with this email already exists")
+        
+        # Check for existing pending registration
+        pending = PendingRegistration.get_by_email(db, email)
+        otp = PendingRegistration.generate_otp()
+        
+        if pending:
+            # Update existing pending registration with new OTP
+            pending.update_otp(db, otp)
+            pending_id = pending.id
+        else:
+            # Create new pending registration
+            pending = PendingRegistration(
+                email=email,
+                hashed_password=hash_password(password),
+                otp_hash=PendingRegistration.hash_otp(otp),
+                expires_at=PendingRegistration.get_expiry_time()
+            )
+            pending.save(db)
+            pending_id = pending.id
+        
+        # Send OTP email
+        try:
+            send_otp_email(email, otp)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to send verification email: {str(e)}")
+        
+        return {
+            "message": "Verification code sent to your email",
+            "pending_registration_id": pending_id
+        }
+
+    def verify_otp(self, pending_registration_id: int, otp: str, db) -> UserResponse:
+        """Verify OTP and complete user registration."""
+        pending = PendingRegistration.get_by_id(db, pending_registration_id)
+        
+        if not pending:
+            raise HTTPException(status_code=404, detail="Registration not found")
+        
+        if pending.is_expired():
+            pending.delete(db)
+            raise HTTPException(status_code=400, detail="Verification code expired. Please register again.")
+        
+        if not pending.verify_otp(otp):
+            raise HTTPException(status_code=400, detail="Invalid verification code")
+        
+        # Create actual user
+        from models.user_model import User
+        user = User(
+            email=pending.email,
+            password=pending.hashed_password
+        )
+        saved_user = user.save(db)
+        
+        # Delete pending registration
+        pending.delete(db)
+        
+        return saved_user
 
     def create_user(self, user: UserCreate, db) -> UserResponse:
         try:
