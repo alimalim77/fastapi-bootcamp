@@ -19,6 +19,7 @@ if config.config_file_name is not None:
 from db.database import Base, DATABASE_URL
 from models.user_model import User  # Import all models here
 from models.todo import Todo
+from models.refresh_token import RefreshToken
 target_metadata = Base.metadata
 
 # Override the sqlalchemy.url in the config with the one from the app
