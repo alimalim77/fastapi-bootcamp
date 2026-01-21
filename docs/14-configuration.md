@@ -12,6 +12,7 @@ Environment variables, Docker setup, and deployment.
 | `SECRET_KEY` | `supersecretkey` | **Yes** (production) | JWT signing key |
 | `EMAIL_ADDRESS` | - | **Yes** | Gmail address for OTP emails |
 | `EMAIL_PASSWORD` | - | **Yes** | Gmail App Password (16-char) |
+| `REDIS_URL` | `redis://localhost:6379/0` | No | Redis connection for rate limiting |
 
 ### .env Example
 
@@ -20,6 +21,7 @@ DATABASE_URL=sqlite:///./app.db
 SECRET_KEY=your-super-secret-key-change-in-production
 EMAIL_ADDRESS=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
+REDIS_URL=redis://localhost:6379/0
 ```
 
 ### Production Recommendations
@@ -182,15 +184,14 @@ After starting the server, access:
 
 Consider adding these features:
 
-- **Rate Limiting**: Protect against brute force attacks
 - **Password Reset**: Using OTP infrastructure
 - **OAuth2 Social Login**: Google, GitHub integration
 - **API Versioning Strategy**: Support multiple API versions
-- **Caching Layer**: Redis for session and response caching
+- **Session Storage**: Redis for session management
 - **Background Tasks**: Celery for async operations
 - **Monitoring**: Prometheus metrics and health endpoints
 - **Logging**: Structured logging with correlation IDs
 
 ---
 
-[← Back to Index](./README.md) | [Previous: Testing](./13-testing.md)
+[← Back to Index](./README.md) | [Previous: Testing](./13-testing.md) | [Next: Rate Limiting →](./15-rate-limiting.md)

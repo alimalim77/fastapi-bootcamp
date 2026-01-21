@@ -20,6 +20,7 @@ A comprehensive REST API built with FastAPI following clean architecture princip
 | 12 | [API Reference](./12-api-reference.md) | Complete API endpoints documentation |
 | 13 | [Testing](./13-testing.md) | Testing guide with cURL examples |
 | 14 | [Configuration](./14-configuration.md) | Environment variables, Docker, deployment |
+| 15 | [Rate Limiting](./15-rate-limiting.md) | Redis-based API rate limiting |
 
 ---
 
@@ -53,6 +54,7 @@ uvicorn index:app --reload
 | Authentication | JWT (python-jose) |
 | Password Hashing | Argon2 (passlib) |
 | Validation | Pydantic |
+| Rate Limiting | Redis |
 | Container | Docker |
 
 ## Key Features
@@ -60,5 +62,7 @@ uvicorn index:app --reload
 - ✅ **OTP Email Verification** - Secure user registration
 - ✅ **JWT Authentication** - Access + Refresh tokens
 - ✅ **Role-Based Access** - Admin/User permissions
+- ✅ **Rate Limiting** - Redis-based API protection
 - ✅ **Clean Architecture** - Layered separation
 - ✅ **Docker Support** - Production-ready containers
+
