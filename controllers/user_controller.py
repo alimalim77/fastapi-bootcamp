@@ -3,6 +3,7 @@ from services.user_service import UserService
 from schemas.user_schema import UserCreate, UserResponse, UserLogin, Token, RegisterResponse
 from utils.jwt_handler import create_access_token, get_refresh_token_expiry
 from utils.email_sender import send_otp_email
+from utils.kafka_producer import send_email_task
 from models.refresh_token import RefreshToken
 from models.pending_registration import PendingRegistration
 from datetime import timedelta, datetime, timezone
@@ -44,11 +45,15 @@ class UserController:
             pending.save(db)
             pending_id = pending.id
         
-        # Send OTP email
-        try:
-            send_otp_email(email, otp)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to send verification email: {str(e)}")
+        # Send OTP email via Kafka (async) or fall back to sync
+        kafka_sent = send_email_task(email, otp)
+        
+        if not kafka_sent:
+            # Kafka not available, send synchronously
+            try:
+                send_otp_email(email, otp)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Failed to send verification email: {str(e)}")
         
         return {
             "message": "Verification code sent to your email",

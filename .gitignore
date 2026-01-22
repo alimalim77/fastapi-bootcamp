@@ -21,7 +21,7 @@ env/
 ENV/
 .venv/
 
-.env.example
+.env
 app.db
 fastapi.db
 cookies.txt

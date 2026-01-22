@@ -20,7 +20,7 @@ REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60  # 7 days in seconds
     summary="Register a new user",
     description="Initiate registration by sending OTP to email. If email already has pending registration, resends OTP."
 )
-@rate_limit("3/hour")  # Prevent spam registrations
+#@rate_limit("3/hour")  # Prevent spam registrations
 async def register_user(request: Request, user: UserValidationSchema, db: Session = Depends(get_db)):
     """Initiate registration with OTP verification."""
     return controller.initiate_registration(user.email, user.password, db)
