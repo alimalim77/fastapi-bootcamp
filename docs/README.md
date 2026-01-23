@@ -21,6 +21,7 @@ A comprehensive REST API built with FastAPI following clean architecture princip
 | 13 | [Testing](./13-testing.md) | Testing guide with cURL examples |
 | 14 | [Configuration](./14-configuration.md) | Environment variables, Docker, deployment |
 | 15 | [Rate Limiting](./15-rate-limiting.md) | Redis-based API rate limiting |
+| 16 | [Kafka Email Queue](./16-kafka-email-queue.md) | Async email sending with Kafka |
 
 ---
 
