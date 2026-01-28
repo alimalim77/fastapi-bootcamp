@@ -6,8 +6,14 @@ The email worker (consumer) will pick up these messages and send the actual emai
 """
 import os
 import json
+from datetime import datetime
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
+
+
+# Topic names
+EMAIL_QUEUE_TOPIC = "email-queue"
+EMAIL_DLQ_TOPIC = "email-dlq"
 
 
 def get_kafka_producer():
@@ -60,7 +66,7 @@ def send_email_task(to_email: str, otp: str) -> bool:
         }
         
         # Send to Kafka topic "email-queue"
-        future = producer.send("email-queue", message)
+        future = producer.send(EMAIL_QUEUE_TOPIC, message)
         
         # Wait for send to complete (with timeout)
         future.get(timeout=10)
@@ -74,3 +80,45 @@ def send_email_task(to_email: str, otp: str) -> bool:
     
     finally:
         producer.close()
+
+
+def send_to_dlq(original_message: dict, error: str, retry_count: int) -> bool:
+    """
+    Send a failed message to the Dead Letter Queue.
+    
+    Args:
+        original_message: The original message that failed
+        error: Error message describing why it failed
+        retry_count: Number of retries attempted
+    
+    Returns:
+        True if sent to DLQ successfully, False otherwise
+    """
+    producer = get_kafka_producer()
+    
+    if producer is None:
+        print("Cannot send to DLQ: Kafka not available")
+        return False
+    
+    try:
+        dlq_message = {
+            "original_message": original_message,
+            "error": str(error),
+            "retry_count": retry_count,
+            "failed_at": datetime.utcnow().isoformat() + "Z",
+            "source_topic": EMAIL_QUEUE_TOPIC
+        }
+        
+        future = producer.send(EMAIL_DLQ_TOPIC, dlq_message)
+        future.get(timeout=10)
+        
+        print(f"Message sent to DLQ: {original_message.get('to', 'unknown')}")
+        return True
+        
+    except KafkaError as e:
+        print(f"Failed to send to DLQ: {e}")
+        return False
+    
+    finally:
+        producer.close()
+
