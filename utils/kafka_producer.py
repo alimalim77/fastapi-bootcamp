@@ -9,11 +9,13 @@ import json
 from datetime import datetime
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
+from utils.metrics import increment_dlq_counter
 
 
 # Topic names
 EMAIL_QUEUE_TOPIC = "email-queue"
 EMAIL_DLQ_TOPIC = "email-dlq"
+
 
 
 def get_kafka_producer():
@@ -111,6 +113,9 @@ def send_to_dlq(original_message: dict, error: str, retry_count: int) -> bool:
         
         future = producer.send(EMAIL_DLQ_TOPIC, dlq_message)
         future.get(timeout=10)
+        
+        # Increment Prometheus DLQ counter
+        increment_dlq_counter(EMAIL_DLQ_TOPIC)
         
         print(f"Message sent to DLQ: {original_message.get('to', 'unknown')}")
         return True
