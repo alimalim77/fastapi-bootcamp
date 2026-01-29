@@ -23,6 +23,7 @@ A comprehensive REST API built with FastAPI following clean architecture princip
 | 15 | [Rate Limiting](./15-rate-limiting.md) | Redis-based API rate limiting |
 | 16 | [Kafka Email Queue](./16-kafka-email-queue.md) | Async email sending with Kafka |
 | 17 | [Distributed Locks](./17-distributed-locks.md) | Redis locks for race condition prevention |
+| 18 | [System Design](./system-design.md) | High-level architecture and design decisions |
 
 ---
 

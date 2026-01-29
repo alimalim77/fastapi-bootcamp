@@ -5,6 +5,14 @@ from sqlalchemy import pool
 
 from alembic import context
 
+import os
+import sys
+# Ensure app root is in sys.path
+if os.path.exists("/app"):
+    sys.path.append("/app")
+else:
+    sys.path.append(os.getcwd())
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

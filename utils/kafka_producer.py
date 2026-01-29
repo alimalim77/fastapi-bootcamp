@@ -1,8 +1,7 @@
 """
-Kafka Producer for Email Queue
-==============================
-Sends email tasks to Kafka for async processing.
-The email worker (consumer) will pick up these messages and send the actual emails.
+Kafka Producer Utility
+=======================
+Handles sending messages to Kafka queues.
 """
 import os
 import json
@@ -17,54 +16,62 @@ EMAIL_QUEUE_TOPIC = "email-queue"
 EMAIL_DLQ_TOPIC = "email-dlq"
 
 
+# Prometheus Metrics
+KAFKA_MESSAGES_PRODUCED_TOTAL = Counter(
+    'kafka_messages_produced_total',
+    'Total number of Kafka messages produced',
+    ['topic', 'status']
+)
+
+KAFKA_DLQ_MESSAGES_TOTAL = Counter(
+    "kafka_dl_messages_total",
+    "Total number of messages sent to Dead Letter Queue",
+    ["status"]
+)
+
+_producer = None
 
 def get_kafka_producer():
-    """
-    Create and return a Kafka producer.
-    Returns None if Kafka is not available.
-    """
-    try:
-        bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-        producer = KafkaProducer(
-            bootstrap_servers=bootstrap_servers,
-            value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-            # Wait for message to be acknowledged
-            acks='all',
-            # Retry on failure
-            retries=3
-        )
-        return producer
-    except KafkaError as e:
-        print(f"Failed to connect to Kafka: {e}")
-        return None
+    """Get or create singleton Kafka producer."""
+    global _producer
+    if _producer is None:
+        try:
+            bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+            print(f"Connecting to Kafka producer at {bootstrap_servers}...")
+            _producer = KafkaProducer(
+                bootstrap_servers=bootstrap_servers,
+                value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                acks='all',  # Wait for all replicas to acknowledge
+                retries=3    # Retry sending if fails
+            )
+            print("Kafka producer connected!")
+        except Exception as e:
+            print(f"Failed to connect to Kafka: {e}")
+            return None
+    return _producer
 
-
-def send_email_task(to_email: str, otp: str) -> bool:
+def send_email_task(to_email: str, otp: str, retry_count: int = 0) -> bool:
     """
-    Send an email task to Kafka queue.
+    Send an email task to the Kafka queue.
     
     Args:
-        to_email: Recipient email address
-        otp: The OTP code to send
+        to_email: Data to send
+        otp: OTP code
+        retry_count: Number of times this has been retried (default 0)
     
     Returns:
-        True if message was sent successfully, False otherwise
-    
-    Example:
-        send_email_task("user@example.com", "123456")
+        bool: True if sent (or queued), False if failed
     """
     producer = get_kafka_producer()
-    
-    if producer is None:
-        print("Kafka not available, falling back to sync email")
+    if not producer:
         return False
     
     try:
-        # Create the message
-        message = {
+        task = {
+            "type": "send_otp",
             "to": to_email,
             "otp": otp,
-            "type": "otp_verification"
+            "retry_count": retry_count
         }
         
         # Send to Kafka topic "email-queue"
@@ -73,11 +80,38 @@ def send_email_task(to_email: str, otp: str) -> bool:
         # Wait for send to complete (with timeout)
         future.get(timeout=10)
         
+        
         print(f"Email task queued for {to_email}")
+        KAFKA_MESSAGES_PRODUCED_TOTAL.labels(topic='email-queue', status='success').inc()
         return True
         
-    except KafkaError as e:
-        print(f"Failed to send to Kafka: {e}")
+    except Exception as e:
+        print(f"Failed to send task to Kafka: {e}")
+        KAFKA_MESSAGES_PRODUCED_TOTAL.labels(topic='email-queue', status='failed').inc()
+        return False
+
+def send_to_dlq(task_data: dict, error_reason: str) -> bool:
+    """
+    Send a failed task to the Dead Letter Queue (DLQ).
+    """
+    producer = get_kafka_producer()
+    if not producer:
+        return False
+        
+    try:
+        dlq_data = {
+            "original_task": task_data,
+            "error": error_reason,
+            "failed_at": str(os.getenv("HOSTNAME", "unknown"))
+        }
+        producer.send('email-dlq', dlq_data).get(timeout=10)
+        producer.send('email-dlq', dlq_data).get(timeout=10)
+        print(f"Task sent to DLQ: {task_data}")
+        KAFKA_DLQ_MESSAGES_TOTAL.labels(status='success').inc()
+        return True
+    except Exception as e:
+        print(f"Failed to send to DLQ: {e}")
+        KAFKA_DLQ_MESSAGES_TOTAL.labels(status='failed').inc()
         return False
     
     finally:

@@ -91,11 +91,19 @@ def start_metrics_server():
     start_http_server(METRICS_PORT)
     print(f"Metrics available at http://localhost:{METRICS_PORT}/metrics")
 
+# Prometheus Metrics
+EMAIL_TASKS_PROCESSED_TOTAL = Counter(
+    'email_tasks_processed_total',
+    'Total number of email tasks processed',
+    ['status']
+)
+
+
+MAX_RETRIES = 3
 
 def start_email_worker():
     """
     Start the email worker.
-    This will continuously listen for messages and send emails.
     """
     # Start metrics server in background
     metrics_thread = threading.Thread(target=start_metrics_server, daemon=True)
@@ -103,25 +111,30 @@ def start_email_worker():
     
     bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
     
+    bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+    
+    # Start Prometheus metrics server
+    start_http_server(8001)
+    print("Metrics server started on port 8001")
+    
     print(f"Connecting to Kafka at {bootstrap_servers}...")
     print(f"Retry config: max_retries={MAX_RETRIES}, backoff_base={BACKOFF_BASE}s")
     
     try:
-        # Create consumer
         consumer = KafkaConsumer(
-            "email-queue",  # Topic to listen to
+            "email-queue",
             bootstrap_servers=bootstrap_servers,
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-            group_id="email-workers",  # Consumer group for load balancing
-            auto_offset_reset="earliest"  # Start from beginning if no offset
+            group_id="email-workers",
+            auto_offset_reset="earliest"
         )
         
         print("Email worker started! Waiting for messages...")
         print("Press Ctrl+C to stop\n")
         
-        # Listen for messages forever
         for message in consumer:
             data = message.value
+            retry_count = data.get('retry_count', 0)
             
             print(f"Received email task:")
             print(f"  To: {data.get('to', 'unknown')}")
