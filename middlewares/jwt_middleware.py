@@ -8,11 +8,13 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         excluded_paths = ["/docs", 
         "/openapi.json", 
         "/health", 
+        "/metrics",
         "/api/v1/users/login", 
         "/api/v1/users/register", 
         "/api/v1/users/refresh", 
         "/api/v1/users/logout", 
-        "/api/v1/users/verify-otp"
+        "/api/v1/users/verify-otp",
+        "/metrics"
         ]
         
         # Normalize path by removing trailing slash for comparison

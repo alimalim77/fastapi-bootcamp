@@ -77,6 +77,8 @@ services:
   email_worker:
     build: .
     container_name: email_worker
+    ports:
+      - "8002:8001"
     environment:
       EMAIL_ADDRESS: alim1905050100040@gmail.com
       EMAIL_PASSWORD: luxvzxnwksbsostq
@@ -86,7 +88,67 @@ services:
         condition: service_healthy
     command: python workers/email_worker.py
 
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: kafka-exporter
+    ports:
+      - "9308:9308"
+    environment:
+      KAFKA_SERVER: kafka:9092
+    command:
+      - '--kafka.server=kafka:9092'
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9095:9090"
+    volumes:
+      - prometheus_data:/prometheus
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        cat > /etc/prometheus/prometheus.yml << 'EOF'
+        global:
+          scrape_interval: 15s
+          evaluation_interval: 15s
+
+        scrape_configs:
+          - job_name: 'fastapi'
+            static_configs:
+              - targets: ['app:8000']
+            metrics_path: '/metrics'
+          
+          - job_name: 'email_worker'
+            static_configs:
+              - targets: ['email_worker:8001']
+          
+          - job_name: 'kafka_exporter'
+            static_configs:
+              - targets: ['kafka-exporter:9308']
+        EOF
+        exec prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus
+    depends_on:
+      - app
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
 volumes:
   postgres_data:
-
-
+  prometheus_data:
+  grafana_data:
