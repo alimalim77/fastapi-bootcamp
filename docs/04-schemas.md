@@ -69,15 +69,28 @@ class OTPVerifyRequest(BaseModel):
 
 **File**: `schemas/todo_schema.py`
 
+### Priority Enum
+
+The `Priority` enum is used across todo schemas for type safety:
+
+```python
+class Priority(str, Enum):
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+```
+
 ### TodoCreate
 ```python
 class TodoCreate(BaseModel):
     title: str
     description: Optional[str] = None
+    priority: Priority = Priority.MEDIUM
 ```
 **Purpose**: Validates new todo creation.
 - `title` is required
 - `description` is optional
+- `priority` defaults to `medium` (accepts: `high`, `medium`, `low`)
 
 ### TodoUpdate
 ```python
@@ -85,10 +98,12 @@ class TodoUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
+    priority: Optional[Priority] = None
 ```
 **Purpose**: Partial update support.
 - All fields optional for PATCH-like behavior
 - Only provided fields are updated
+- `priority` can be changed to any valid priority level
 
 ### TodoResponse
 ```python
@@ -97,6 +112,7 @@ class TodoResponse(BaseModel):
     title: str
     description: Optional[str] = None
     completed: bool
+    priority: Priority
     user_id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -105,6 +121,7 @@ class TodoResponse(BaseModel):
         from_attributes = True
 ```
 **Purpose**: Complete todo representation for API responses.
+- Includes `priority` field showing current task priority
 
 ---
 
