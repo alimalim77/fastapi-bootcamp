@@ -12,6 +12,7 @@ from models import User
 from api.v1.routes.user_routes import router as user_router
 from api.v1.routes.todo_routes import router as todo_router
 from api.v1.routes.board_routes import router as board_router
+from api.v1.routes.list_routes import router as list_router
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from middlewares.jwt_middleware import JWTAuthMiddleware
@@ -31,6 +32,7 @@ app.add_middleware(JWTAuthMiddleware)
 app.include_router(user_router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(todo_router, prefix="/api/v1/todos", tags=["Todos"])
 app.include_router(board_router, prefix="/api/v1/boards", tags=["Boards"])
+app.include_router(list_router, prefix="/api/v1", tags=["Lists"])
 
 @app.exception_handler(RequestValidationError) 
 async def validation_exception_handler(request, exc):
