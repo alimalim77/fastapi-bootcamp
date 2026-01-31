@@ -1,14 +1,17 @@
 from sqlalchemy.orm import Session
-from models.todo import Todo
+from models.todo import Todo, Priority
 from schemas.todo_schema import TodoCreate, TodoUpdate
 from fastapi import HTTPException
 
 
 class TodoService:
     def create_todo(self, user_id: int, todo_data: TodoCreate, db: Session) -> Todo:
+        # Convert schema Priority enum to model Priority enum
+        priority = Priority(todo_data.priority.value)
         todo = Todo(
             title=todo_data.title,
             description=todo_data.description,
+            priority=priority,
             user_id=user_id
         )
         return todo.save(db)
@@ -31,6 +34,8 @@ class TodoService:
             todo.description = todo_data.description
         if todo_data.completed is not None:
             todo.completed = todo_data.completed
+        if todo_data.priority is not None:
+            todo.priority = Priority(todo_data.priority.value)
         
         return todo.save(db)
 

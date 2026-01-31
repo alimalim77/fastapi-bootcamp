@@ -82,12 +82,32 @@ token = secrets.token_urlsafe(64)  # 86 characters, cryptographically secure
 
 **Table**: `todos`
 
+### Priority Enum
+
+The `Priority` enum defines task importance levels:
+
+| Value | Description |
+|-------|-------------|
+| `HIGH` | High priority task |
+| `MEDIUM` | Medium priority (default) |
+| `LOW` | Low priority task |
+
+```python
+class Priority(enum.Enum):
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+```
+
+### Columns
+
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | `id` | Integer | Primary Key | Unique todo identifier |
 | `title` | String(255) | Not Null | Task title |
 | `description` | String(1000) | Nullable | Optional task description |
 | `completed` | Boolean | Default: False | Completion status |
+| `priority` | Enum(Priority) | Default: MEDIUM, Not Null | Task priority level |
 | `user_id` | Integer | Foreign Key → users.id | Todo owner |
 | `created_at` | DateTime(timezone=True) | Auto-set on create | Creation timestamp |
 | `updated_at` | DateTime(timezone=True) | Auto-set on update | Last modification timestamp |
