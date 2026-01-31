@@ -66,7 +66,7 @@ erDiagram
 
 ---
 
-## Phase 2: Lists (Kanban Columns)
+## Phase 2: Lists (Kanban Columns) ✅
 
 ### List Model
 
@@ -75,30 +75,81 @@ erDiagram
 | `id` | Integer | Primary key |
 | `name` | String(100) | List name (e.g., "To Do", "In Progress") |
 | `position` | Integer | Order within board (0-indexed) |
-| `board_id` | FK → boards.id | Parent board |
+| `board_id` | FK → boards.id | Parent board (CASCADE delete) |
 | `created_at` | DateTime | Auto-set |
+
+### Schemas
+
+**ListCreate**
+```python
+class ListCreate(BaseModel):
+    name: str  # min_length=1, max_length=100
+    position: Optional[int] = None  # Auto-calculated if not provided
+```
+
+**ListUpdate**
+```python
+class ListUpdate(BaseModel):
+    name: Optional[str] = None
+```
+
+**ListMove**
+```python
+class ListMove(BaseModel):
+    position: int  # ge=0
+```
+
+**ListResponse**
+```python
+class ListResponse(BaseModel):
+    id: int
+    name: str
+    position: int
+    board_id: int
+    created_at: Optional[datetime]
+```
 
 ### API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/boards/{board_id}/lists` | Create list |
-| GET | `/boards/{board_id}/lists` | Get all lists for board |
+| POST | `/boards/{board_id}/lists` | Create list (auto-position if not provided) |
+| GET | `/boards/{board_id}/lists` | Get all lists ordered by position |
+| GET | `/lists/{id}` | Get single list |
 | PUT | `/lists/{id}` | Update list name |
 | DELETE | `/lists/{id}` | Delete list + cascade cards |
 | PATCH | `/lists/{id}/move` | Reorder list position |
 
 ### Position Management
 
-Lists are ordered by the `position` field. When:
-- **Creating**: New lists get `position = max(existing) + 1`
-- **Reordering**: Update positions of affected lists
-- **Deleting**: No reorder needed (gaps allowed)
+Lists are ordered by the `position` field:
+
+| Action | Behavior |
+|--------|----------|
+| **Create** | `position = max(existing) + 1` |
+| **Move** | Shifts affected lists up/down |
+| **Delete** | No reorder (gaps allowed) |
+
+**Example: Move list from position 2 → 0**
+```
+Before: To Do(0), In Progress(1), Done(2)
+After:  Done(0), To Do(1), In Progress(2)
+```
 
 ### Access Control
 
 - Only **board members** can view/modify lists
 - Lists inherit permissions from parent board
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `models/list.py` | List model with position helpers |
+| `schemas/list_schema.py` | Create, Update, Move, Response schemas |
+| `services/list_service.py` | CRUD + position management |
+| `controllers/list_controller.py` | Route ↔ Service bridge |
+| `api/v1/routes/list_routes.py` | API endpoints |
 
 ---
 

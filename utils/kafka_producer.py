@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
+from prometheus_client import Counter
 from utils.metrics import increment_dlq_counter
 
 
