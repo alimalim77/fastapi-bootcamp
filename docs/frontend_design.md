@@ -2,7 +2,7 @@
 
 This document contains the visual references derived from the [Figma Prototype](https://output-ebook-44686284.figma.site/).
 
-![Figma Analysis Recording](/home/mohammadali/.gemini/antigravity/brain/98a5bdb7-6ae5-4320-81c5-861e4d1c7441/analyze_figma_design_1770027303704.webp)
+![Figma Analysis Recording](./assets/analyze_figma_design.webp)
 *Recording of the Figma design analysis session.*
 
 ---
@@ -13,7 +13,7 @@ This document contains the visual references derived from the [Figma Prototype](
 - **Sidebar**: Dark theme, fixed width, specific navigation hierarchy.
 - **Main Content**: Light background, fluid width.
 
-![App Shell](/home/mohammadali/.gemini/antigravity/brain/98a5bdb7-6ae5-4320-81c5-861e4d1c7441/figma_app_shell_1770027648356.png)
+![App Shell](./assets/figma_app_shell.png)
 *Full application layout showing sidebar navigation and user profile.*
 
 ---
@@ -24,7 +24,7 @@ This document contains the visual references derived from the [Figma Prototype](
 - **Header**: Board title, member avatars, settings.
 - **Canvas**: Horizontal scrolling lists.
 
-![Board View](/home/mohammadali/.gemini/antigravity/brain/98a5bdb7-6ae5-4320-81c5-861e4d1c7441/figma_board_view_1770027710466.png)
+![Board View](./assets/figma_board_view.png)
 *Board layout with header and horizontal Kanban columns.*
 
 ---
@@ -36,7 +36,7 @@ This document contains the visual references derived from the [Figma Prototype](
 - **Body**: Stack of cards with spacing.
 - **Footer**: "Add a card" action.
 
-![List Component](/home/mohammadali/.gemini/antigravity/brain/98a5bdb7-6ae5-4320-81c5-861e4d1c7441/figma_list_component_1770027773241.png)
+![List Component](./assets/figma_list_component.png)
 *A single Kanban list column containing multiple task cards.*
 
 ---
@@ -48,7 +48,7 @@ This document contains the visual references derived from the [Figma Prototype](
 - **Content**: Task title.
 - **Metadata**: Icons for due date, checklist count, comments count.
 
-![Card Component](/home/mohammadali/.gemini/antigravity/brain/98a5bdb7-6ae5-4320-81c5-861e4d1c7441/figma_card_component_1770027662751.png)
+![Card Component](./assets/figma_card_component.png)
 *Detailed view of a task card showing labels and metadata icons.*
 
 ---
@@ -60,7 +60,7 @@ This document contains the visual references derived from the [Figma Prototype](
 - **Items**: Checkbox (rounded) + Text (strikethrough when done).
 - **Progress**: Visual progress bar (implied).
 
-![Checklist Component](/home/mohammadali/.gemini/antigravity/brain/98a5bdb7-6ae5-4320-81c5-861e4d1c7441/figma_checklist_component_1770027735316.png)
+![Checklist Component](./assets/figma_checklist_component.png)
 *Checklist section within the task detail modal.*
 
 ---
@@ -71,5 +71,5 @@ This document contains the visual references derived from the [Figma Prototype](
 - **Input**: User avatar + Text area + Primary Save button.
 - **Thread**: List of comments with user info and timestamp.
 
-![Comments Component](/home/mohammadali/.gemini/antigravity/brain/98a5bdb7-6ae5-4320-81c5-861e4d1c7441/figma_comments_component_1770027742428.png)
+![Comments Component](./assets/figma_comments_component.png)
 *Activity section showing the comment input and history.*
