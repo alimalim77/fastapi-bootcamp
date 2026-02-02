@@ -472,6 +472,156 @@ Authorization: Bearer <token>
 
 ---
 
+## Checklists
+
+### Create Checklist Item
+
+```http
+POST /cards/1/checklist
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "content": "Review PR changes"
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": 1,
+  "content": "Review PR changes",
+  "completed": false,
+  "position": 0,
+  "card_id": 1,
+  "created_at": "2026-02-02T09:12:15Z"
+}
+```
+
+### Get Checklist Items
+
+```http
+GET /cards/1/checklist
+Authorization: Bearer <token>
+```
+
+### Get Checklist Progress
+
+```http
+GET /cards/1/checklist/progress
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "total": 2,
+  "completed": 1,
+  "percentage": 50.0,
+  "items": [
+    {"id": 1, "content": "Review PR", "completed": true, "...": "..."},
+    {"id": 2, "content": "Update docs", "completed": false, "...": "..."}
+  ]
+}
+```
+
+### Toggle Checklist Item
+
+```http
+PATCH /checklist/1/toggle
+Authorization: Bearer <token>
+```
+
+**Response:** Returns item with toggled `completed` status.
+
+### Update Checklist Item
+
+```http
+PUT /checklist/1
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "content": "Review PR changes (critical)"
+}
+```
+
+### Delete Checklist Item
+
+```http
+DELETE /checklist/1
+Authorization: Bearer <token>
+```
+
+---
+
+## Comments
+
+### Create Comment
+
+```http
+POST /cards/1/comments
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "content": "This is a test comment on the card!"
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": 1,
+  "content": "This is a test comment on the card!",
+  "card_id": 1,
+  "author_id": 1,
+  "author": {"id": 1, "email": "user@example.com"},
+  "created_at": "2026-02-02T09:40:33Z",
+  "updated_at": null
+}
+```
+
+### Get Card Comments
+
+```http
+GET /cards/1/comments
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "comments": [...],
+  "total": 3
+}
+```
+
+### Update Comment (Author-Only)
+
+```http
+PUT /comments/1
+Content-Type: application/json
+Authorization: Bearer <token>
+
+{
+  "content": "Updated comment text!"
+}
+```
+
+> **Note:** Returns `403 Forbidden` if user is not the comment author.
+
+### Delete Comment (Author-Only)
+
+```http
+DELETE /comments/1
+Authorization: Bearer <token>
+```
+
+> **Note:** Returns `403 Forbidden` if user is not the comment author.
+
+---
+
 ## Common Color Codes
 
 | Color | Hex Code | Use Case |

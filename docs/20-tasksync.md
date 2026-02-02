@@ -319,6 +319,107 @@ class CardResponse(BaseModel):
 
 ---
 
+## Phase 5: Checklists ✅
+
+### ChecklistItem Model
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | Integer | Primary key |
+| `content` | String(500) | Checklist item text |
+| `completed` | Boolean | Done flag (default: false) |
+| `position` | Integer | Order within card (0-indexed) |
+| `card_id` | FK → todos.id | Parent card (CASCADE delete) |
+| `created_at` | DateTime | Auto-set |
+
+### Schemas
+
+**ChecklistItemCreate**
+```python
+class ChecklistItemCreate(BaseModel):
+    content: str  # min_length=1, max_length=500
+    position: Optional[int] = None  # Auto-calculated
+```
+
+**ChecklistProgressResponse**
+```python
+class ChecklistProgressResponse(BaseModel):
+    total: int
+    completed: int
+    percentage: float
+    items: List[ChecklistItemResponse]
+```
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/cards/{id}/checklist` | Create item (auto-position) |
+| GET | `/cards/{id}/checklist` | Get items ordered by position |
+| GET | `/cards/{id}/checklist/progress` | Get completion stats + items |
+| GET | `/checklist/{id}` | Get specific item |
+| PUT | `/checklist/{id}` | Update item content/completed |
+| PATCH | `/checklist/{id}/toggle` | Toggle completed status |
+| DELETE | `/checklist/{id}` | Delete item |
+
+### Access Control
+
+- Checklist items inherit permissions from parent card's list's board
+- Only board members can view/modify checklist items
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `models/checklist_item.py` | ChecklistItem model |
+| `schemas/checklist_schema.py` | CRUD + progress schemas |
+| `services/checklist_service.py` | CRUD + toggle + progress logic |
+| `controllers/checklist_controller.py` | Route to service bridge |
+| `api/v1/routes/checklist_routes.py` | Checklist API endpoints |
+
+---
+
+## Phase 6: Comments ✅
+
+### Comment Model
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | Integer | Primary key |
+| `content` | String(2000) | Comment text |
+| `card_id` | FK → todos.id | Parent card (CASCADE) |
+| `author_id` | FK → users.id | Comment author (CASCADE) |
+| `created_at` | DateTime | Auto-set |
+| `updated_at` | DateTime | Auto-updated on edit |
+
+### Access Control
+
+- **View:** Board members can view all comments on accessible cards
+- **Create:** Board members can comment on accessible cards
+- **Edit/Delete:** **Author-only** - only the comment author can modify
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/cards/{id}/comments` | Create comment |
+| GET | `/cards/{id}/comments` | Get all comments + author info |
+| GET | `/comments/{id}` | Get specific comment |
+| PUT | `/comments/{id}` | Update comment (author-only) |
+| DELETE | `/comments/{id}` | Delete comment (author-only) |
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `models/comment.py` | Comment model |
+| `schemas/comment_schema.py` | CRUD schemas with author info |
+| `services/comment_service.py` | CRUD + author-only enforcement |
+| `controllers/comment_controller.py` | Route to service bridge |
+| `api/v1/routes/comment_routes.py` | Comment API endpoints |
+
+---
+
 ## Files Structure
 
 ```

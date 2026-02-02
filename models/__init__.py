@@ -4,3 +4,5 @@ from .board import Board, BoardMember
 from .list import List
 from .label import Label, CardLabel
 from .todo import Todo, CardMember
+from .checklist_item import ChecklistItem
+from .comment import Comment

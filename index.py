@@ -15,6 +15,8 @@ from api.v1.routes.board_routes import router as board_router
 from api.v1.routes.list_routes import router as list_router
 from api.v1.routes.label_routes import router as label_router
 from api.v1.routes.card_routes import router as card_router
+from api.v1.routes.checklist_routes import router as checklist_router
+from api.v1.routes.comment_routes import router as comment_router
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from middlewares.jwt_middleware import JWTAuthMiddleware
@@ -45,6 +47,8 @@ app.include_router(board_router, prefix="/api/v1/boards", tags=["Boards"])
 app.include_router(list_router, prefix="/api/v1", tags=["Lists"])
 app.include_router(label_router, prefix="/api/v1", tags=["Labels"])
 app.include_router(card_router, prefix="/api/v1", tags=["Cards"])
+app.include_router(checklist_router, prefix="/api/v1", tags=["Checklists"])
+app.include_router(comment_router, prefix="/api/v1", tags=["Comments"])
 
 @app.exception_handler(RequestValidationError) 
 async def validation_exception_handler(request, exc):
