@@ -4,7 +4,6 @@ from models.list import List
 from models.board import Board, BoardMember
 from schemas.list_schema import ListCreate, ListUpdate, ListMove
 
-
 class ListService:
     """Service for list-related business logic."""
 
