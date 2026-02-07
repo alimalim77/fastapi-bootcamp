@@ -76,7 +76,7 @@ def send_email_task(to_email: str, otp: str, retry_count: int = 0) -> bool:
         }
         
         # Send to Kafka topic "email-queue"
-        future = producer.send(EMAIL_QUEUE_TOPIC, message)
+        future = producer.send(EMAIL_QUEUE_TOPIC, task)
         
         # Wait for send to complete (with timeout)
         future.get(timeout=10)
