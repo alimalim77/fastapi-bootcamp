@@ -25,7 +25,7 @@ load_dotenv()
 
 from kafka import KafkaConsumer
 from kafka.errors import KafkaError
-from prometheus_client import start_http_server
+from prometheus_client import start_http_server, Counter
 from utils.email_sender import send_otp_email
 from utils.kafka_producer import send_to_dlq
 from utils.metrics import increment_email_attempt, observe_email_processing_time

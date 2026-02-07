@@ -53,7 +53,7 @@ def get_kafka_producer():
 
 def send_email_task(to_email: str, otp: str, retry_count: int = 0) -> bool:
     """
-    Send an email task to the Kafka queue.
+    Send an email task to the Kafka queue, or send directly if Kafka is not available.
     
     Args:
         to_email: Data to send
@@ -63,6 +63,21 @@ def send_email_task(to_email: str, otp: str, retry_count: int = 0) -> bool:
     Returns:
         bool: True if sent (or queued), False if failed
     """
+    # Check if Kafka is configured
+    bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "")
+    
+    # If Kafka is not configured, send email directly
+    if not bootstrap_servers:
+        try:
+            from utils.email_sender import send_otp_email
+            send_otp_email(to_email, otp)
+            print(f"Email sent directly to {to_email} (Kafka not configured)")
+            return True
+        except Exception as e:
+            print(f"Failed to send email directly: {e}")
+            return False
+    
+    # Otherwise, use Kafka queue
     producer = get_kafka_producer()
     if not producer:
         return False

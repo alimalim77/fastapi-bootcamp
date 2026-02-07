@@ -25,3 +25,7 @@ ENV/
 app.db
 fastapi.db
 cookies.txt
+
+# Production credentials (keep out of git!)
+.env.production
+scripts/ec2-setup.sh
