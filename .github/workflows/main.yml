@@ -52,4 +52,5 @@ jobs:
           REDIS_URL: redis://localhost:6379/0
           SECRET_KEY: "supersecretkey" # Use a dummy key for testing
         run: |
+          alembic upgrade head
           pytest -v
