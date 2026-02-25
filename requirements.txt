@@ -14,3 +14,4 @@ redis>=5.0.0
 kafka-python
 prometheus-client
 prometheus-fastapi-instrumentator
+gunicorn
